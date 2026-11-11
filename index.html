@@ -29,6 +29,14 @@
     .status{font-weight:800;display:block;margin-bottom:4px}
     .status.ok{color:var(--ok)}.status.warn{color:var(--warn)}
     .small{color:var(--muted);font-size:.9rem}
+    .log-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .log-toolbar button{margin:0}
+    .log-list{list-style:none;padding:0;margin:14px 0 0;max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#0c0c0a}
+    .log-list li{display:grid;grid-template-columns:96px 70px 1fr;gap:10px;padding:9px 11px;border-bottom:1px solid #302a1d;font: .86rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+    .log-list li:last-child{border-bottom:0}
+    .log-time{color:#aaa18b}.log-level{font-weight:800;color:var(--ok)}.log-level.warn{color:var(--warn)}.log-level.error{color:#ff8c8c}
+    .log-message{color:#e7e0cf}
+    @media(max-width:500px){.log-list li{grid-template-columns:1fr;gap:2px}}
     .pill{display:inline-block;padding:3px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem}
     footer{margin-top:26px;color:var(--muted);font-size:.84rem;text-align:center}
     a{color:var(--gold)}
@@ -55,6 +63,16 @@
           <option value="es">Español</option>
           <option value="en">English</option>
           <option value="pt">Português</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+          <option value="ru">Русский</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="zh">简体中文</option>
+          <option value="ar">العربية</option>
+          <option value="tr">Türkçe</option>
+          <option value="id">Bahasa Indonesia</option>
         </select>
       </div>
       <div>
@@ -87,6 +105,17 @@
     <p class="small" id="firmwareNote">“No listado” no significa necesariamente imposible; significa que esta publicación oficial concreta no confirma esa versión. No uses archivos de otro firmware.</p>
   </section>
 
+  <section class="panel" id="logPanel">
+    <h2 id="logTitle">Registro de actividad</h2>
+    <p class="small" id="logIntro">Muestra las comprobaciones y eventos de esta página. No representa la ejecución de un exploit.</p>
+    <div class="log-toolbar">
+      <button id="exportLog" type="button">Exportar registro</button>
+      <button id="clearLog" type="button" class="secondary">Limpiar registro</button>
+    </div>
+    <ol class="log-list" id="logList" aria-live="polite" aria-relevant="additions"></ol>
+    <p class="small" id="logSafety">Si ocurre un error, la página conservará el mensaje y no apagará ni reiniciará la consola. Decide manualmente si quieres salir o reiniciarla.</p>
+  </section>
+
   <section class="panel" id="infoPanel">
     <h2 id="infoTitle">Recursos oficiales</h2>
     <p id="infoText">Consulta las notas del proyecto original antes de instalar cualquier complemento. GoldenHell no contiene exploits ni payloads ejecutables.</p>
@@ -100,142 +129,406 @@
 (() => {
   const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71","11.00"]);
   const dictionary = {
-    es: {
-      eyebrow:"Portal de homebrew para PS4", subtitle:"Consulta de firmware, idiomas y recursos oficiales de homebrew.",
-      settings:"Preferencias", language:"Idioma", mode:"Modo",
+    es:{
+      eyebrow:"Portal de homebrew para PS4",subtitle:"Consulta de firmware, idiomas y recursos oficiales de homebrew.",
+      settings:"Preferencias",language:"Idioma",mode:"Modo",
       modes:{goldhen:"Compatibilidad GoldHEN",unlisted:"Firmware no listado",homebrew:"Información homebrew"},
-      modeDescriptions:{
-        goldhen:"Consulta qué versiones aparecen en la publicación oficial enlazada.",
-        unlisted:"Comprueba versiones como 12.00 que no aparecen en la lista oficial enlazada.",
-        homebrew:"Información sobre software casero y las funciones de este portal."
-      },
-      firmwareTitle:"Consulta de firmware",
-      firmwareIntro:"Selecciona la versión de sistema de tu PS4. La comprobación compara la versión con la lista del lanzamiento oficial de GoldHEN v2.4b18 en GitHub.",
-      firmwareLabel:"Firmware de la consola", placeholder:"Selecciona una versión…", other:"Otra versión",
-      check:"Comprobar", choose:"Selecciona tu firmware y pulsa Comprobar.",
-      known:"Figura en la lista", notListed:"No figura en esta publicación",
-      knownText:"Esta versión aparece en la lista de firmware de GoldHEN v2.4b18 publicada en el repositorio oficial. Esto no significa que GoldenHell ejecute el jailbreak.",
-      unlistedText:"Esta versión no aparece en la lista de GoldHEN v2.4b18 del repositorio oficial consultado. Su compatibilidad queda sin confirmar aquí.",
-      otherText:"No hay datos para esa versión en este portal. Consulta siempre las notas oficiales.",
+      modeDescriptions:{goldhen:"Consulta qué versiones aparecen en la publicación oficial enlazada.",unlisted:"Comprueba versiones como 12.00 que no aparecen en la lista oficial enlazada.",homebrew:"Información sobre software casero y las funciones de este portal."},
+      firmwareTitle:"Consulta de firmware",firmwareIntro:"Selecciona la versión de sistema de tu PS4. La comprobación compara la versión con la lista del lanzamiento oficial de GoldHEN v2.4b18 en GitHub.",
+      firmwareLabel:"Firmware de la consola",placeholder:"Selecciona una versión…",other:"Otra versión",check:"Comprobar",choose:"Selecciona tu firmware y pulsa Comprobar.",
+      known:"Figura en la lista",notListed:"No figura en esta publicación",knownText:"Esta versión aparece en la lista de firmware de GoldHEN v2.4b18 publicada en el repositorio oficial. Esto no significa que GoldenHell ejecute el jailbreak.",
+      unlistedText:"Esta versión no aparece en la lista de GoldHEN v2.4b18 del repositorio oficial consultado. Su compatibilidad queda sin confirmar aquí.",otherText:"No hay datos para esa versión en este portal. Consulta siempre las notas oficiales.",
       note:"“No listado” no significa necesariamente imposible; significa que esta publicación oficial concreta no confirma esa versión. No uses archivos de otro firmware.",
-      infoTitle:"Recursos oficiales",
-      infoText:"Consulta las notas del proyecto original antes de instalar cualquier complemento. GoldenHell no contiene exploits ni payloads ejecutables.",
-      release:"Versiones oficiales de GoldHEN", source:"Código fuente oficial",
-      footer:"PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN."
+      infoTitle:"Recursos oficiales",infoText:"Consulta las notas del proyecto original antes de instalar cualquier complemento. GoldenHell no contiene exploits ni payloads ejecutables.",
+      release:"Versiones oficiales de GoldHEN",source:"Código fuente oficial",footer:"PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN.",
+      logTitle:"Registro de actividad",logIntro:"Muestra las comprobaciones y eventos de esta página. No representa la ejecución de un exploit.",
+      exportLog:"Exportar registro",clearLog:"Limpiar registro",logSafety:"Si ocurre un error, la página conservará el mensaje y no apagará ni reiniciará la consola. Decide manualmente si quieres salir o reiniciarla.",
+      log:{started:"GoldenHell se inició. Portal informativo; no hay ningún exploit ejecutándose.",language:"Idioma seleccionado:",mode:"Modo seleccionado:",selected:"Firmware seleccionado:",checkStart:"Comprobación de firmware iniciada.",listed:"Resultado: la versión figura en la lista consultada.",unlisted:"Resultado: la versión no figura en la lista consultada.",exported:"Registro exportado por el usuario.",cleared:"Registro limpiado por el usuario.",error:"Error de la página:",promise:"Error no controlado:",manual:"No se ejecutó ningún apagado ni reinicio automático."},
+      levels:{info:"INFO",warn:"AVISO",error:"ERROR"}
     },
-    en: {
-      eyebrow:"PS4 homebrew portal", subtitle:"Firmware lookup, language options and official homebrew resources.",
-      settings:"Preferences", language:"Language", mode:"Mode",
+    en:{
+      eyebrow:"PS4 homebrew portal",subtitle:"Firmware lookup, language options and official homebrew resources.",
+      settings:"Preferences",language:"Language",mode:"Mode",
       modes:{goldhen:"GoldHEN compatibility",unlisted:"Unlisted firmware",homebrew:"Homebrew information"},
-      modeDescriptions:{
-        goldhen:"Check which versions are listed by the linked official release.",
-        unlisted:"Check versions such as 12.00 that are not listed by the linked official release.",
-        homebrew:"Information about homebrew software and this portal's features."
-      },
-      firmwareTitle:"Firmware lookup",
-      firmwareIntro:"Select your PS4 system version. This checker compares it with the firmware list in the official GoldHEN v2.4b18 GitHub release.",
-      firmwareLabel:"Console firmware", placeholder:"Select a version…", other:"Other version",
-      check:"Check", choose:"Select your firmware and press Check.",
-      known:"Listed in release", notListed:"Not listed in this release",
-      knownText:"This version appears in the firmware list for GoldHEN v2.4b18 in the official repository. This does not mean GoldenHell runs a jailbreak.",
-      unlistedText:"This version does not appear in the GoldHEN v2.4b18 list in the official repository checked. Compatibility is unconfirmed here.",
-      otherText:"This portal has no data for that version. Always check the official release notes.",
+      modeDescriptions:{goldhen:"Check which versions are listed by the linked official release.",unlisted:"Check versions such as 12.00 that are not listed by the linked official release.",homebrew:"Information about homebrew software and this portal's features."},
+      firmwareTitle:"Firmware lookup",firmwareIntro:"Select your PS4 system version. This checker compares it with the firmware list in the official GoldHEN v2.4b18 GitHub release.",
+      firmwareLabel:"Console firmware",placeholder:"Select a version…",other:"Other version",check:"Check",choose:"Select your firmware and press Check.",
+      known:"Listed in release",notListed:"Not listed in this release",knownText:"This version appears in the firmware list for GoldHEN v2.4b18 in the official repository. This does not mean GoldenHell runs a jailbreak.",
+      unlistedText:"This version does not appear in the GoldHEN v2.4b18 list in the official repository checked. Compatibility is unconfirmed here.",otherText:"This portal has no data for that version. Always check the official release notes.",
       note:"“Not listed” does not necessarily mean impossible; it means this specific official release does not confirm that version. Do not use files for a different firmware.",
-      infoTitle:"Official resources",
-      infoText:"Read the original project's release notes before installing any add-on. GoldenHell does not contain exploits or executable payloads.",
-      release:"Official GoldHEN releases", source:"Official source code",
-      footer:"PS4 GoldenHell · Independent community project · Not affiliated with Sony or the GoldHEN team."
+      infoTitle:"Official resources",infoText:"Read the original project's release notes before installing any add-on. GoldenHell does not contain exploits or executable payloads.",
+      release:"Official GoldHEN releases",source:"Official source code",footer:"PS4 GoldenHell · Independent community project · Not affiliated with Sony or the GoldHEN team.",
+      logTitle:"Activity log",logIntro:"Shows checks and events performed by this page. It does not represent exploit execution.",
+      exportLog:"Export log",clearLog:"Clear log",logSafety:"If an error occurs, the page will keep the message visible and will not shut down or restart the console. You decide manually whether to exit or restart it.",
+      log:{started:"GoldenHell started. Information portal; no exploit is running.",language:"Selected language:",mode:"Selected mode:",selected:"Selected firmware:",checkStart:"Firmware check started.",listed:"Result: this version appears in the checked list.",unlisted:"Result: this version does not appear in the checked list.",exported:"Log exported by the user.",cleared:"Log cleared by the user.",error:"Page error:",promise:"Unhandled error:",manual:"No automatic shutdown or restart was performed."},
+      levels:{info:"INFO",warn:"WARNING",error:"ERROR"}
     },
-    pt: {
-      eyebrow:"Portal homebrew para PS4", subtitle:"Consulta de firmware, idiomas e recursos oficiais de homebrew.",
-      settings:"Preferências", language:"Idioma", mode:"Modo",
+    pt:{
+      eyebrow:"Portal homebrew para PS4",subtitle:"Consulta de firmware, idiomas e recursos oficiais de homebrew.",
+      settings:"Preferências",language:"Idioma",mode:"Modo",
       modes:{goldhen:"Compatibilidade GoldHEN",unlisted:"Firmware não listado",homebrew:"Informações homebrew"},
-      modeDescriptions:{
-        goldhen:"Consulte quais versões aparecem na publicação oficial vinculada.",
-        unlisted:"Confira versões como 12.00 que não aparecem na lista oficial vinculada.",
-        homebrew:"Informações sobre software caseiro e os recursos deste portal."
-      },
-      firmwareTitle:"Consulta de firmware",
-      firmwareIntro:"Selecione a versão do sistema do seu PS4. A verificação compara a versão com a lista do lançamento oficial GoldHEN v2.4b18 no GitHub.",
-      firmwareLabel:"Firmware do console", placeholder:"Selecione uma versão…", other:"Outra versão",
-      check:"Verificar", choose:"Selecione seu firmware e pressione Verificar.",
-      known:"Listado na versão", notListed:"Não listado nesta versão",
-      knownText:"Esta versão aparece na lista de firmware do GoldHEN v2.4b18 no repositório oficial. Isso não significa que o GoldenHell execute o jailbreak.",
-      unlistedText:"Esta versão não aparece na lista do GoldHEN v2.4b18 no repositório oficial consultado. A compatibilidade não está confirmada aqui.",
-      otherText:"Este portal não tem dados para essa versão. Consulte sempre as notas oficiais.",
+      modeDescriptions:{goldhen:"Consulte quais versões aparecem na publicação oficial vinculada.",unlisted:"Confira versões como 12.00 que não aparecem na lista oficial vinculada.",homebrew:"Informações sobre software caseiro e os recursos deste portal."},
+      firmwareTitle:"Consulta de firmware",firmwareIntro:"Selecione a versão do sistema do seu PS4. A verificação compara a versão com a lista do lançamento oficial GoldHEN v2.4b18 no GitHub.",
+      firmwareLabel:"Firmware do console",placeholder:"Selecione uma versão…",other:"Outra versão",check:"Verificar",choose:"Selecione seu firmware e pressione Verificar.",
+      known:"Listado na versão",notListed:"Não listado nesta versão",knownText:"Esta versão aparece na lista de firmware do GoldHEN v2.4b18 no repositório oficial. Isso não significa que o GoldenHell execute o jailbreak.",
+      unlistedText:"Esta versão não aparece na lista do GoldHEN v2.4b18 no repositório oficial consultado. A compatibilidade não está confirmada aqui.",otherText:"Este portal não tem dados para essa versão. Consulte sempre as notas oficiais.",
       note:"“Não listado” não significa necessariamente impossível; significa que esta publicação oficial específica não confirma essa versão. Não use arquivos de outro firmware.",
-      infoTitle:"Recursos oficiais",
-      infoText:"Consulte as notas do projeto original antes de instalar qualquer complemento. O GoldenHell não contém exploits nem payloads executáveis.",
-      release:"Versões oficiais do GoldHEN", source:"Código-fonte oficial",
-      footer:"PS4 GoldenHell · Projeto comunitário independente · Não afiliado à Sony nem à equipe GoldHEN."
+      infoTitle:"Recursos oficiais",infoText:"Consulte as notas do projeto original antes de instalar qualquer complemento. O GoldenHell não contém exploits nem payloads executáveis.",
+      release:"Versões oficiais do GoldHEN",source:"Código-fonte oficial",footer:"PS4 GoldenHell · Projeto comunitário independente · Não afiliado à Sony nem à equipe GoldHEN.",
+      logTitle:"Registro de atividade",logIntro:"Mostra as verificações e os eventos desta página. Não representa a execução de um exploit.",
+      exportLog:"Exportar registro",clearLog:"Limpar registro",logSafety:"Se ocorrer um erro, a página manterá a mensagem visível e não desligará nem reiniciará o console. Você decide manualmente se deseja sair ou reiniciá-lo.",
+      log:{started:"GoldenHell iniciado. Portal informativo; nenhum exploit está em execução.",language:"Idioma selecionado:",mode:"Modo selecionado:",selected:"Firmware selecionado:",checkStart:"Verificação de firmware iniciada.",listed:"Resultado: esta versão aparece na lista consultada.",unlisted:"Resultado: esta versão não aparece na lista consultada.",exported:"Registro exportado pelo usuário.",cleared:"Registro limpo pelo usuário.",error:"Erro da página:",promise:"Erro não tratado:",manual:"Nenhum desligamento ou reinício automático foi executado."},
+      levels:{info:"INFO",warn:"AVISO",error:"ERRO"}
+    },
+    fr:{
+      eyebrow:"Portail homebrew PS4",subtitle:"Vérification du firmware, langues et ressources homebrew officielles.",
+      settings:"Préférences",language:"Langue",mode:"Mode",
+      modes:{goldhen:"Compatibilité GoldHEN",unlisted:"Firmware non répertorié",homebrew:"Informations homebrew"},
+      modeDescriptions:{goldhen:"Vérifiez les versions indiquées dans la publication officielle liée.",unlisted:"Consultez les versions comme 12.00 absentes de la liste officielle liée.",homebrew:"Informations sur les logiciels homebrew et ce portail."},
+      firmwareTitle:"Vérification du firmware",firmwareIntro:"Choisissez la version système de votre PS4. La vérification la compare à la liste de la version officielle GoldHEN v2.4b18 sur GitHub.",
+      firmwareLabel:"Firmware de la console",placeholder:"Choisir une version…",other:"Autre version",check:"Vérifier",choose:"Choisissez votre firmware puis cliquez sur Vérifier.",
+      known:"Répertorié",notListed:"Absent de cette publication",knownText:"Cette version figure dans la liste GoldHEN v2.4b18 du dépôt officiel. Cela ne signifie pas que GoldenHell exécute un jailbreak.",
+      unlistedText:"Cette version ne figure pas dans la liste GoldHEN v2.4b18 consultée. Sa compatibilité n'est pas confirmée ici.",otherText:"Ce portail ne possède aucune donnée pour cette version. Consultez les notes officielles.",
+      note:"« Non répertorié » ne signifie pas forcément impossible ; cette publication officielle ne confirme simplement pas cette version. N'utilisez pas de fichiers prévus pour un autre firmware.",
+      infoTitle:"Ressources officielles",infoText:"Consultez les notes du projet original avant d'installer un module. GoldenHell ne contient aucun exploit ni payload exécutable.",
+      release:"Versions officielles GoldHEN",source:"Code source officiel",footer:"PS4 GoldenHell · Projet communautaire indépendant · Non affilié à Sony ni à l'équipe GoldHEN.",
+      logTitle:"Journal d'activité",logIntro:"Affiche les vérifications et événements de cette page. Il ne représente pas l'exécution d'un exploit.",
+      exportLog:"Exporter le journal",clearLog:"Effacer le journal",logSafety:"En cas d'erreur, le message restera affiché. La console ne sera ni éteinte ni redémarrée automatiquement. Vous déciderez vous-même de quitter ou de redémarrer.",
+      log:{started:"GoldenHell démarré. Portail d'information ; aucun exploit n'est en cours.",language:"Langue sélectionnée :",mode:"Mode sélectionné :",selected:"Firmware sélectionné :",checkStart:"Vérification du firmware démarrée.",listed:"Résultat : cette version figure dans la liste consultée.",unlisted:"Résultat : cette version ne figure pas dans la liste consultée.",exported:"Journal exporté par l'utilisateur.",cleared:"Journal effacé par l'utilisateur.",error:"Erreur de la page :",promise:"Erreur non gérée :",manual:"Aucun arrêt ni redémarrage automatique n'a été effectué."},
+      levels:{info:"INFO",warn:"AVERT.",error:"ERREUR"}
+    },
+    de:{
+      eyebrow:"PS4-Homebrew-Portal",subtitle:"Firmware-Prüfung, Sprachen und offizielle Homebrew-Ressourcen.",
+      settings:"Einstellungen",language:"Sprache",mode:"Modus",
+      modes:{goldhen:"GoldHEN-Kompatibilität",unlisted:"Nicht gelistete Firmware",homebrew:"Homebrew-Informationen"},
+      modeDescriptions:{goldhen:"Prüft, welche Versionen in der verlinkten offiziellen Veröffentlichung stehen.",unlisted:"Prüft Versionen wie 12.00, die nicht in der verlinkten offiziellen Liste stehen.",homebrew:"Informationen zu Homebrew-Software und diesem Portal."},
+      firmwareTitle:"Firmware-Prüfung",firmwareIntro:"Wähle die Systemversion deiner PS4. Diese Prüfung vergleicht sie mit der Firmware-Liste der offiziellen GoldHEN-Version v2.4b18 auf GitHub.",
+      firmwareLabel:"Konsolen-Firmware",placeholder:"Version auswählen…",other:"Andere Version",check:"Prüfen",choose:"Wähle deine Firmware und drücke Prüfen.",
+      known:"In der Veröffentlichung gelistet",notListed:"In dieser Veröffentlichung nicht gelistet",knownText:"Diese Version steht in der GoldHEN-v2.4b18-Liste des offiziellen Repositorys. Das bedeutet nicht, dass GoldenHell einen Jailbreak ausführt.",
+      unlistedText:"Diese Version steht nicht in der geprüften GoldHEN-v2.4b18-Liste. Die Kompatibilität ist hier nicht bestätigt.",otherText:"Dieses Portal enthält keine Daten zu dieser Version. Prüfe immer die offiziellen Versionshinweise.",
+      note:"„Nicht gelistet“ bedeutet nicht zwingend unmöglich; diese konkrete offizielle Veröffentlichung bestätigt die Version lediglich nicht. Verwende keine Dateien für eine andere Firmware.",
+      infoTitle:"Offizielle Ressourcen",infoText:"Lies vor der Installation von Erweiterungen die Hinweise des Originalprojekts. GoldenHell enthält keine Exploits oder ausführbaren Payloads.",
+      release:"Offizielle GoldHEN-Versionen",source:"Offizieller Quellcode",footer:"PS4 GoldenHell · Unabhängiges Community-Projekt · Nicht mit Sony oder dem GoldHEN-Team verbunden.",
+      logTitle:"Aktivitätsprotokoll",logIntro:"Zeigt Prüfungen und Ereignisse dieser Seite. Es zeigt keine Exploit-Ausführung.",
+      exportLog:"Protokoll exportieren",clearLog:"Protokoll löschen",logSafety:"Bei einem Fehler bleibt die Meldung sichtbar. Die Konsole wird nicht automatisch ausgeschaltet oder neu gestartet. Du entscheidest selbst, ob du beendest oder neu startest.",
+      log:{started:"GoldenHell gestartet. Informationsportal; es läuft kein Exploit.",language:"Ausgewählte Sprache:",mode:"Ausgewählter Modus:",selected:"Ausgewählte Firmware:",checkStart:"Firmware-Prüfung gestartet.",listed:"Ergebnis: Diese Version steht in der geprüften Liste.",unlisted:"Ergebnis: Diese Version steht nicht in der geprüften Liste.",exported:"Protokoll vom Benutzer exportiert.",cleared:"Protokoll vom Benutzer gelöscht.",error:"Seitenfehler:",promise:"Nicht behandelter Fehler:",manual:"Es wurde kein automatisches Ausschalten oder Neustarten ausgeführt."},
+      levels:{info:"INFO",warn:"WARNUNG",error:"FEHLER"}
+    },
+    it:{
+      eyebrow:"Portale homebrew PS4",subtitle:"Controllo firmware, lingue e risorse homebrew ufficiali.",
+      settings:"Preferenze",language:"Lingua",mode:"Modalità",
+      modes:{goldhen:"Compatibilità GoldHEN",unlisted:"Firmware non elencato",homebrew:"Informazioni homebrew"},
+      modeDescriptions:{goldhen:"Controlla le versioni elencate nella pubblicazione ufficiale collegata.",unlisted:"Controlla versioni come 12.00 non presenti nell'elenco ufficiale collegato.",homebrew:"Informazioni sul software homebrew e su questo portale."},
+      firmwareTitle:"Controllo firmware",firmwareIntro:"Seleziona la versione di sistema della PS4. Il controllo la confronta con l'elenco firmware della versione ufficiale GoldHEN v2.4b18 su GitHub.",
+      firmwareLabel:"Firmware della console",placeholder:"Seleziona una versione…",other:"Altra versione",check:"Controlla",choose:"Seleziona il firmware e premi Controlla.",
+      known:"Presente nella release",notListed:"Non presente in questa release",knownText:"Questa versione compare nell'elenco GoldHEN v2.4b18 del repository ufficiale. Questo non significa che GoldenHell esegua il jailbreak.",
+      unlistedText:"Questa versione non compare nell'elenco GoldHEN v2.4b18 consultato. La compatibilità qui non è confermata.",otherText:"Questo portale non contiene dati per questa versione. Consulta sempre le note ufficiali.",
+      note:"“Non elencato” non significa necessariamente impossibile; questa specifica release ufficiale non conferma la versione. Non usare file destinati a un firmware diverso.",
+      infoTitle:"Risorse ufficiali",infoText:"Consulta le note del progetto originale prima di installare componenti aggiuntivi. GoldenHell non contiene exploit o payload eseguibili.",
+      release:"Release ufficiali GoldHEN",source:"Codice sorgente ufficiale",footer:"PS4 GoldenHell · Progetto comunitario indipendente · Non affiliato a Sony o al team GoldHEN.",
+      logTitle:"Registro attività",logIntro:"Mostra i controlli e gli eventi di questa pagina. Non rappresenta l'esecuzione di un exploit.",
+      exportLog:"Esporta registro",clearLog:"Cancella registro",logSafety:"In caso di errore, il messaggio resterà visibile. La console non verrà spenta né riavviata automaticamente. Decidi tu se uscire o riavviare.",
+      log:{started:"GoldenHell avviato. Portale informativo; nessun exploit è in esecuzione.",language:"Lingua selezionata:",mode:"Modalità selezionata:",selected:"Firmware selezionato:",checkStart:"Controllo firmware avviato.",listed:"Risultato: questa versione compare nell'elenco consultato.",unlisted:"Risultato: questa versione non compare nell'elenco consultato.",exported:"Registro esportato dall'utente.",cleared:"Registro cancellato dall'utente.",error:"Errore della pagina:",promise:"Errore non gestito:",manual:"Non è stato eseguito alcuno spegnimento o riavvio automatico."},
+      levels:{info:"INFO",warn:"AVVISO",error:"ERRORE"}
+    },
+    ru:{
+      eyebrow:"Портал homebrew для PS4",subtitle:"Проверка прошивки, выбор языка и официальные ресурсы homebrew.",
+      settings:"Настройки",language:"Язык",mode:"Режим",
+      modes:{goldhen:"Совместимость GoldHEN",unlisted:"Прошивка вне списка",homebrew:"Информация о homebrew"},
+      modeDescriptions:{goldhen:"Проверьте версии, указанные в связанной официальной публикации.",unlisted:"Проверьте версии, например 12.00, которых нет в связанной официальной таблице.",homebrew:"Информация о homebrew-программах и возможностях портала."},
+      firmwareTitle:"Проверка прошивки",firmwareIntro:"Выберите версию системы PS4. Проверка сравнивает её со списком прошивок официального выпуска GoldHEN v2.4b18 на GitHub.",
+      firmwareLabel:"Прошивка консоли",placeholder:"Выберите версию…",other:"Другая версия",check:"Проверить",choose:"Выберите прошивку и нажмите «Проверить».",
+      known:"Указана в выпуске",notListed:"В этом выпуске не указана",knownText:"Эта версия указана в списке GoldHEN v2.4b18 официального репозитория. Это не означает, что GoldenHell выполняет jailbreak.",
+      unlistedText:"Этой версии нет в проверенном списке GoldHEN v2.4b18. Совместимость здесь не подтверждена.",otherText:"На портале нет данных для этой версии. Всегда проверяйте официальные примечания к выпуску.",
+      note:"«Не указана» не обязательно означает невозможность; этот конкретный официальный выпуск просто не подтверждает данную версию. Не используйте файлы для другой прошивки.",
+      infoTitle:"Официальные ресурсы",infoText:"Перед установкой дополнений прочитайте примечания исходного проекта. GoldenHell не содержит эксплойтов или исполняемых payload-файлов.",
+      release:"Официальные выпуски GoldHEN",source:"Официальный исходный код",footer:"PS4 GoldenHell · Независимый проект сообщества · Не связан с Sony или командой GoldHEN.",
+      logTitle:"Журнал событий",logIntro:"Показывает проверки и события этой страницы. Он не отражает выполнение эксплойта.",
+      exportLog:"Экспорт журнала",clearLog:"Очистить журнал",logSafety:"При ошибке сообщение останется на экране. Консоль не будет автоматически выключена или перезапущена. Вы сами решаете, выходить или перезапускать её.",
+      log:{started:"GoldenHell запущен. Информационный портал; эксплойт не выполняется.",language:"Выбранный язык:",mode:"Выбранный режим:",selected:"Выбранная прошивка:",checkStart:"Проверка прошивки началась.",listed:"Результат: версия есть в проверенном списке.",unlisted:"Результат: версии нет в проверенном списке.",exported:"Журнал экспортирован пользователем.",cleared:"Журнал очищен пользователем.",error:"Ошибка страницы:",promise:"Необработанная ошибка:",manual:"Автоматическое выключение или перезапуск не выполнялись."},
+      levels:{info:"ИНФО",warn:"ВНИМАНИЕ",error:"ОШИБКА"}
+    },
+    ja:{
+      eyebrow:"PS4 homebrew ポータル",subtitle:"ファームウェア確認、言語設定、公式 homebrew リソース。",
+      settings:"設定",language:"言語",mode:"モード",
+      modes:{goldhen:"GoldHEN 互換性",unlisted:"一覧にないファームウェア",homebrew:"Homebrew 情報"},
+      modeDescriptions:{goldhen:"リンク先の公式リリースに記載されたバージョンを確認します。",unlisted:"公式一覧にない 12.00 などのバージョンを確認します。",homebrew:"Homebrew ソフトウェアとこのポータルの機能について説明します。"},
+      firmwareTitle:"ファームウェア確認",firmwareIntro:"PS4 のシステムバージョンを選択してください。公式 GoldHEN v2.4b18 GitHub リリースの一覧と照合します。",
+      firmwareLabel:"本体のファームウェア",placeholder:"バージョンを選択…",other:"その他のバージョン",check:"確認",choose:"ファームウェアを選択して「確認」を押してください。",
+      known:"リリースに記載あり",notListed:"このリリースには記載なし",knownText:"このバージョンは公式リポジトリの GoldHEN v2.4b18 一覧に記載されています。GoldenHell が jailbreak を実行するという意味ではありません。",
+      unlistedText:"このバージョンは確認した GoldHEN v2.4b18 一覧にありません。ここでは互換性を確認できません。",otherText:"このポータルにはそのバージョンのデータがありません。公式リリースノートを確認してください。",
+      note:"「一覧にない」は必ずしも不可能という意味ではありません。この公式リリースで確認されていないという意味です。別のファームウェア用ファイルを使わないでください。",
+      infoTitle:"公式リソース",infoText:"追加コンポーネントを導入する前に元のプロジェクトのリリースノートを確認してください。GoldenHell に exploit や実行可能な payload は含まれません。",
+      release:"GoldHEN 公式リリース",source:"公式ソースコード",footer:"PS4 GoldenHell · 独立したコミュニティプロジェクト · Sony および GoldHEN チームとは無関係です。",
+      logTitle:"アクティビティログ",logIntro:"このページの確認とイベントを表示します。exploit の実行状況を示すものではありません。",
+      exportLog:"ログをエクスポート",clearLog:"ログを消去",logSafety:"エラーが発生してもメッセージを画面に残します。コンソールを自動で終了・再起動しません。終了または再起動は利用者が判断してください。",
+      log:{started:"GoldenHell を起動しました。情報ポータルです。exploit は実行されていません。",language:"選択した言語:",mode:"選択したモード:",selected:"選択したファームウェア:",checkStart:"ファームウェア確認を開始しました。",listed:"結果: このバージョンは確認した一覧にあります。",unlisted:"結果: このバージョンは確認した一覧にありません。",exported:"利用者がログをエクスポートしました。",cleared:"利用者がログを消去しました。",error:"ページエラー:",promise:"未処理エラー:",manual:"自動終了または再起動は実行していません。"},
+      levels:{info:"情報",warn:"警告",error:"エラー"}
+    },
+    ko:{
+      eyebrow:"PS4 홈브루 포털",subtitle:"펌웨어 확인, 언어 설정 및 공식 홈브루 자료.",
+      settings:"환경설정",language:"언어",mode:"모드",
+      modes:{goldhen:"GoldHEN 호환성",unlisted:"목록에 없는 펌웨어",homebrew:"홈브루 정보"},
+      modeDescriptions:{goldhen:"연결된 공식 릴리스에 표시된 버전을 확인합니다.",unlisted:"공식 목록에 없는 12.00 등의 버전을 확인합니다.",homebrew:"홈브루 소프트웨어와 이 포털의 기능에 관한 정보입니다."},
+      firmwareTitle:"펌웨어 확인",firmwareIntro:"PS4 시스템 버전을 선택하세요. 공식 GoldHEN v2.4b18 GitHub 릴리스의 펌웨어 목록과 비교합니다.",
+      firmwareLabel:"콘솔 펌웨어",placeholder:"버전 선택…",other:"기타 버전",check:"확인",choose:"펌웨어를 선택하고 확인을 누르세요.",
+      known:"릴리스 목록에 있음",notListed:"이 릴리스에 없음",knownText:"이 버전은 공식 저장소의 GoldHEN v2.4b18 목록에 있습니다. GoldenHell이 jailbreak를 실행한다는 뜻은 아닙니다.",
+      unlistedText:"이 버전은 확인한 GoldHEN v2.4b18 목록에 없습니다. 여기서는 호환성이 확인되지 않았습니다.",otherText:"이 포털에는 해당 버전의 데이터가 없습니다. 공식 릴리스 노트를 확인하세요.",
+      note:"‘목록에 없음’이 반드시 불가능하다는 뜻은 아닙니다. 이 공식 릴리스에서 해당 버전을 확인하지 못했다는 의미입니다. 다른 펌웨어용 파일을 사용하지 마세요.",
+      infoTitle:"공식 자료",infoText:"추가 기능을 설치하기 전에 원본 프로젝트의 릴리스 노트를 확인하세요. GoldenHell에는 exploit이나 실행 가능한 payload가 포함되어 있지 않습니다.",
+      release:"GoldHEN 공식 릴리스",source:"공식 소스 코드",footer:"PS4 GoldenHell · 독립 커뮤니티 프로젝트 · Sony 또는 GoldHEN 팀과 제휴하지 않습니다.",
+      logTitle:"활동 로그",logIntro:"이 페이지에서 발생한 확인 및 이벤트를 표시합니다. exploit 실행을 나타내지는 않습니다.",
+      exportLog:"로그 내보내기",clearLog:"로그 지우기",logSafety:"오류가 발생해도 메시지를 화면에 유지합니다. 콘솔을 자동으로 종료하거나 재시작하지 않습니다. 종료 또는 재시작은 사용자가 직접 결정하세요.",
+      log:{started:"GoldenHell이 시작되었습니다. 정보 포털이며 exploit은 실행되지 않습니다.",language:"선택한 언어:",mode:"선택한 모드:",selected:"선택한 펌웨어:",checkStart:"펌웨어 확인을 시작했습니다.",listed:"결과: 이 버전은 확인한 목록에 있습니다.",unlisted:"결과: 이 버전은 확인한 목록에 없습니다.",exported:"사용자가 로그를 내보냈습니다.",cleared:"사용자가 로그를 지웠습니다.",error:"페이지 오류:",promise:"처리되지 않은 오류:",manual:"자동 종료 또는 재시작을 실행하지 않았습니다."},
+      levels:{info:"정보",warn:"경고",error:"오류"}
+    },
+    zh:{
+      eyebrow:"PS4 自制软件门户",subtitle:"固件查询、语言选项和官方自制软件资源。",
+      settings:"偏好设置",language:"语言",mode:"模式",
+      modes:{goldhen:"GoldHEN 兼容性",unlisted:"未列出的固件",homebrew:"自制软件信息"},
+      modeDescriptions:{goldhen:"查看链接的官方版本中列出的固件。",unlisted:"查看 12.00 等未出现在链接官方列表中的版本。",homebrew:"关于自制软件和本门户功能的信息。"},
+      firmwareTitle:"固件查询",firmwareIntro:"选择 PS4 系统版本。本工具会将其与 GitHub 官方 GoldHEN v2.4b18 发布说明中的固件列表进行比较。",
+      firmwareLabel:"主机固件",placeholder:"选择版本…",other:"其他版本",check:"检查",choose:"选择固件，然后点击检查。",
+      known:"已列入该版本",notListed:"未列入该版本",knownText:"此版本出现在官方仓库的 GoldHEN v2.4b18 固件列表中。这并不表示 GoldenHell 正在运行 jailbreak。",
+      unlistedText:"此版本未出现在所查询的 GoldHEN v2.4b18 官方列表中。此处无法确认其兼容性。",otherText:"本门户没有该版本的数据。请始终查看官方发布说明。",
+      note:"“未列出”不一定代表无法使用；它只表示此官方版本没有确认该固件。请勿使用为其他固件制作的文件。",
+      infoTitle:"官方资源",infoText:"安装任何附加组件前，请阅读原项目的发布说明。GoldenHell 不包含 exploit 或可执行 payload。",
+      release:"GoldHEN 官方版本",source:"官方源代码",footer:"PS4 GoldenHell · 独立社区项目 · 与 Sony 或 GoldHEN 团队无关联。",
+      logTitle:"活动日志",logIntro:"显示此页面执行的检查和事件，不代表 exploit 正在运行。",
+      exportLog:"导出日志",clearLog:"清除日志",logSafety:"发生错误时，页面会保留错误信息，不会自动关闭或重启主机。是否退出或重启由用户自行决定。",
+      log:{started:"GoldenHell 已启动。这是信息门户；没有运行 exploit。",language:"已选择语言：",mode:"已选择模式：",selected:"已选择固件：",checkStart:"开始检查固件。",listed:"结果：此版本出现在已检查的列表中。",unlisted:"结果：此版本未出现在已检查的列表中。",exported:"用户已导出日志。",cleared:"用户已清除日志。",error:"页面错误：",promise:"未处理的错误：",manual:"未执行自动关机或重启。"},
+      levels:{info:"信息",warn:"警告",error:"错误"}
+    },
+    ar:{
+      eyebrow:"بوابة برامج PS4 المنزلية",subtitle:"فحص البرنامج الثابت واللغات وموارد homebrew الرسمية.",
+      settings:"التفضيلات",language:"اللغة",mode:"الوضع",
+      modes:{goldhen:"توافق GoldHEN",unlisted:"برنامج ثابت غير مدرج",homebrew:"معلومات homebrew"},
+      modeDescriptions:{goldhen:"تحقق من الإصدارات المدرجة في الإصدار الرسمي المرتبط.",unlisted:"تحقق من إصدارات مثل 12.00 غير المدرجة في القائمة الرسمية المرتبطة.",homebrew:"معلومات عن برامج homebrew وميزات هذه البوابة."},
+      firmwareTitle:"فحص البرنامج الثابت",firmwareIntro:"اختر إصدار نظام PS4. تقارن هذه الأداة الإصدار بقائمة البرامج الثابتة في إصدار GoldHEN v2.4b18 الرسمي على GitHub.",
+      firmwareLabel:"برنامج الجهاز الثابت",placeholder:"اختر إصداراً…",other:"إصدار آخر",check:"تحقق",choose:"اختر إصدار البرنامج الثابت ثم اضغط تحقق.",
+      known:"مدرج في الإصدار",notListed:"غير مدرج في هذا الإصدار",knownText:"هذا الإصدار موجود في قائمة GoldHEN v2.4b18 في المستودع الرسمي. هذا لا يعني أن GoldenHell يشغّل jailbreak.",
+      unlistedText:"هذا الإصدار غير موجود في قائمة GoldHEN v2.4b18 التي تم فحصها. التوافق غير مؤكد هنا.",otherText:"لا تتوفر بيانات لهذا الإصدار في هذه البوابة. راجع ملاحظات الإصدار الرسمية دائماً.",
+      note:"«غير مدرج» لا يعني بالضرورة أنه مستحيل؛ بل يعني أن هذا الإصدار الرسمي المحدد لا يؤكد هذا الإصدار. لا تستخدم ملفات مخصصة لبرنامج ثابت آخر.",
+      infoTitle:"المصادر الرسمية",infoText:"راجع ملاحظات المشروع الأصلي قبل تثبيت أي إضافة. لا تتضمن GoldenHell أي exploits أو payloads قابلة للتنفيذ.",
+      release:"إصدارات GoldHEN الرسمية",source:"شفرة المصدر الرسمية",footer:"PS4 GoldenHell · مشروع مجتمعي مستقل · غير تابع لشركة Sony أو فريق GoldHEN.",
+      logTitle:"سجل النشاط",logIntro:"يعرض عمليات الفحص والأحداث التي تنفذها هذه الصفحة. ولا يمثل تشغيل exploit.",
+      exportLog:"تصدير السجل",clearLog:"مسح السجل",logSafety:"عند حدوث خطأ، ستبقى الرسالة ظاهرة. لن يتم إيقاف تشغيل الجهاز أو إعادة تشغيله تلقائياً. يقرر المستخدم بنفسه الخروج أو إعادة التشغيل.",
+      log:{started:"بدأ GoldenHell. هذه بوابة معلومات؛ لا يعمل أي exploit.",language:"اللغة المحددة:",mode:"الوضع المحدد:",selected:"البرنامج الثابت المحدد:",checkStart:"بدأ فحص البرنامج الثابت.",listed:"النتيجة: هذا الإصدار موجود في القائمة التي تم فحصها.",unlisted:"النتيجة: هذا الإصدار غير موجود في القائمة التي تم فحصها.",exported:"صدّر المستخدم السجل.",cleared:"مسح المستخدم السجل.",error:"خطأ في الصفحة:",promise:"خطأ غير معالج:",manual:"لم يتم تنفيذ إيقاف تشغيل أو إعادة تشغيل تلقائي."},
+      levels:{info:"معلومات",warn:"تحذير",error:"خطأ"}
+    },
+    tr:{
+      eyebrow:"PS4 homebrew portalı",subtitle:"Firmware kontrolü, dil seçenekleri ve resmî homebrew kaynakları.",
+      settings:"Tercihler",language:"Dil",mode:"Mod",
+      modes:{goldhen:"GoldHEN uyumluluğu",unlisted:"Listede olmayan firmware",homebrew:"Homebrew bilgisi"},
+      modeDescriptions:{goldhen:"Bağlantılı resmî sürümde listelenen sürümleri kontrol edin.",unlisted:"Resmî listede bulunmayan 12.00 gibi sürümleri kontrol edin.",homebrew:"Homebrew yazılımı ve bu portalın özellikleri hakkında bilgi."},
+      firmwareTitle:"Firmware kontrolü",firmwareIntro:"PS4 sistem sürümünü seçin. Bu denetleyici, sürümü GitHub'daki resmî GoldHEN v2.4b18 sürüm listesindeki firmware bilgileriyle karşılaştırır.",
+      firmwareLabel:"Konsol firmware'i",placeholder:"Bir sürüm seçin…",other:"Başka sürüm",check:"Kontrol et",choose:"Firmware sürümünü seçip Kontrol et düğmesine basın.",
+      known:"Sürümde listelenmiş",notListed:"Bu sürümde listelenmemiş",knownText:"Bu sürüm resmî depodaki GoldHEN v2.4b18 listesinde yer alıyor. Bu, GoldenHell'in jailbreak çalıştırdığı anlamına gelmez.",
+      unlistedText:"Bu sürüm kontrol edilen GoldHEN v2.4b18 listesinde yer almıyor. Uyumluluğu burada doğrulanmadı.",otherText:"Bu portalda bu sürüm için veri yok. Her zaman resmî sürüm notlarını kontrol edin.",
+      note:"“Listede yok” mutlaka imkânsız demek değildir; yalnızca bu belirli resmî sürümün o firmware'i doğrulamadığı anlamına gelir. Başka firmware için hazırlanmış dosyaları kullanmayın.",
+      infoTitle:"Resmî kaynaklar",infoText:"Herhangi bir eklenti yüklemeden önce orijinal projenin sürüm notlarını okuyun. GoldenHell exploit veya çalıştırılabilir payload içermez.",
+      release:"Resmî GoldHEN sürümleri",source:"Resmî kaynak kodu",footer:"PS4 GoldenHell · Bağımsız topluluk projesi · Sony veya GoldHEN ekibiyle bağlantılı değildir.",
+      logTitle:"Etkinlik kaydı",logIntro:"Bu sayfanın kontrollerini ve olaylarını gösterir. Bir exploit'in çalıştığını göstermez.",
+      exportLog:"Kaydı dışa aktar",clearLog:"Kaydı temizle",logSafety:"Bir hata oluşursa mesaj ekranda kalır. Konsol otomatik olarak kapatılmaz veya yeniden başlatılmaz. Çıkış ya da yeniden başlatma kararını kullanıcı verir.",
+      log:{started:"GoldenHell başlatıldı. Bilgi portalı; çalışan bir exploit yok.",language:"Seçilen dil:",mode:"Seçilen mod:",selected:"Seçilen firmware:",checkStart:"Firmware kontrolü başladı.",listed:"Sonuç: Bu sürüm kontrol edilen listede yer alıyor.",unlisted:"Sonuç: Bu sürüm kontrol edilen listede yer almıyor.",exported:"Kayıt kullanıcı tarafından dışa aktarıldı.",cleared:"Kayıt kullanıcı tarafından temizlendi.",error:"Sayfa hatası:",promise:"İşlenmeyen hata:",manual:"Otomatik kapatma veya yeniden başlatma yapılmadı."},
+      levels:{info:"BİLGİ",warn:"UYARI",error:"HATA"}
+    },
+    id:{
+      eyebrow:"Portal homebrew PS4",subtitle:"Pemeriksaan firmware, pilihan bahasa, dan sumber homebrew resmi.",
+      settings:"Preferensi",language:"Bahasa",mode:"Mode",
+      modes:{goldhen:"Kompatibilitas GoldHEN",unlisted:"Firmware tidak terdaftar",homebrew:"Informasi homebrew"},
+      modeDescriptions:{goldhen:"Periksa versi yang tercantum dalam rilis resmi tertaut.",unlisted:"Periksa versi seperti 12.00 yang tidak tercantum dalam daftar resmi tertaut.",homebrew:"Informasi tentang perangkat lunak homebrew dan fitur portal ini."},
+      firmwareTitle:"Pemeriksaan firmware",firmwareIntro:"Pilih versi sistem PS4 Anda. Pemeriksaan ini membandingkannya dengan daftar firmware pada rilis resmi GoldHEN v2.4b18 di GitHub.",
+      firmwareLabel:"Firmware konsol",placeholder:"Pilih versi…",other:"Versi lain",check:"Periksa",choose:"Pilih firmware lalu tekan Periksa.",
+      known:"Tercantum dalam rilis",notListed:"Tidak tercantum dalam rilis ini",knownText:"Versi ini muncul dalam daftar GoldHEN v2.4b18 di repositori resmi. Ini tidak berarti GoldenHell menjalankan jailbreak.",
+      unlistedText:"Versi ini tidak muncul dalam daftar GoldHEN v2.4b18 yang diperiksa. Kompatibilitasnya belum dikonfirmasi di sini.",otherText:"Portal ini tidak memiliki data untuk versi tersebut. Selalu periksa catatan rilis resmi.",
+      note:"“Tidak terdaftar” tidak selalu berarti mustahil; artinya rilis resmi khusus ini tidak mengonfirmasi versi tersebut. Jangan gunakan file untuk firmware lain.",
+      infoTitle:"Sumber resmi",infoText:"Baca catatan proyek asli sebelum memasang add-on. GoldenHell tidak berisi exploit atau payload yang dapat dijalankan.",
+      release:"Rilis resmi GoldHEN",source:"Kode sumber resmi",footer:"PS4 GoldenHell · Proyek komunitas independen · Tidak berafiliasi dengan Sony atau tim GoldHEN.",
+      logTitle:"Log aktivitas",logIntro:"Menampilkan pemeriksaan dan peristiwa dari halaman ini. Ini bukan bukti bahwa exploit sedang berjalan.",
+      exportLog:"Ekspor log",clearLog:"Hapus log",logSafety:"Jika terjadi kesalahan, pesan akan tetap tampil. Konsol tidak akan dimatikan atau dimulai ulang secara otomatis. Pengguna menentukan sendiri apakah ingin keluar atau memulai ulang.",
+      log:{started:"GoldenHell dimulai. Portal informasi; tidak ada exploit yang berjalan.",language:"Bahasa dipilih:",mode:"Mode dipilih:",selected:"Firmware dipilih:",checkStart:"Pemeriksaan firmware dimulai.",listed:"Hasil: versi ini tercantum dalam daftar yang diperiksa.",unlisted:"Hasil: versi ini tidak tercantum dalam daftar yang diperiksa.",exported:"Log diekspor oleh pengguna.",cleared:"Log dihapus oleh pengguna.",error:"Kesalahan halaman:",promise:"Kesalahan tidak tertangani:",manual:"Tidak ada pematian atau mulai ulang otomatis."},
+      levels:{info:"INFO",warn:"PERINGATAN",error:"ERROR"}
     }
   };
 
   const $ = id => document.getElementById(id);
   const language = $("language"), mode = $("mode"), firmware = $("firmware"), result = $("result");
+  const logList = $("logList");
+  const logEntries = [];
+  const maxLogEntries = 120;
+
+  function t() { return dictionary[language.value] || dictionary.es; }
+  function addLog(level, key, detail) {
+    const pack = t();
+    const message = (pack.log[key] || dictionary.en.log[key] || key) + (detail ? " " + String(detail) : "");
+    const entry = {time:new Date(), level, message};
+    logEntries.push(entry);
+    if (logEntries.length > maxLogEntries) logEntries.shift();
+
+    const item = document.createElement("li");
+    const time = document.createElement("span");
+    const levelNode = document.createElement("span");
+    const messageNode = document.createElement("span");
+    time.className = "log-time";
+    levelNode.className = "log-level" + (level === "error" ? " error" : level === "warn" ? " warn" : "");
+    messageNode.className = "log-message";
+    time.textContent = entry.time.toLocaleTimeString();
+    levelNode.textContent = pack.levels[level] || level.toUpperCase();
+    messageNode.textContent = message;
+    item.append(time, levelNode, messageNode);
+    logList.appendChild(item);
+    while (logList.children.length > maxLogEntries) logList.removeChild(logList.firstChild);
+    logList.scrollTop = logList.scrollHeight;
+  }
 
   function renderLanguage() {
-    const t = dictionary[language.value] || dictionary.es;
+    const pack = t();
     document.documentElement.lang = language.value;
-    $("eyebrow").textContent = t.eyebrow;
-    $("subtitle").textContent = t.subtitle;
-    $("settingsTitle").textContent = t.settings;
-    $("languageLabel").textContent = t.language;
-    $("modeLabel").textContent = t.mode;
-    $("firmwareTitle").textContent = t.firmwareTitle;
-    $("firmwareIntro").textContent = t.firmwareIntro;
-    $("firmwareLabel").textContent = t.firmwareLabel;
-    $("check").textContent = t.check;
-    $("firmwareNote").textContent = t.note;
-    $("infoTitle").textContent = t.infoTitle;
-    $("infoText").textContent = t.infoText;
-    $("releaseLink").textContent = t.release;
-    $("sourceLink").textContent = t.source;
-    $("footer").textContent = t.footer;
-    $("modeDescription").textContent = t.modeDescriptions[mode.value];
-    mode.options[0].textContent = t.modes.goldhen;
-    mode.options[1].textContent = t.modes.unlisted;
-    mode.options[2].textContent = t.modes.homebrew;
-    firmware.options[0].textContent = t.placeholder;
-    firmware.options[firmware.options.length - 1].textContent = t.other;
-    if (!firmware.value) result.textContent = t.choose;
-    else checkFirmware();
+    document.documentElement.dir = language.value === "ar" ? "rtl" : "ltr";
+    $("eyebrow").textContent = pack.eyebrow;
+    $("subtitle").textContent = pack.subtitle;
+    $("settingsTitle").textContent = pack.settings;
+    $("languageLabel").textContent = pack.language;
+    $("modeLabel").textContent = pack.mode;
+    $("firmwareTitle").textContent = pack.firmwareTitle;
+    $("firmwareIntro").textContent = pack.firmwareIntro;
+    $("firmwareLabel").textContent = pack.firmwareLabel;
+    $("check").textContent = pack.check;
+    $("firmwareNote").textContent = pack.note;
+    $("infoTitle").textContent = pack.infoTitle;
+    $("infoText").textContent = pack.infoText;
+    $("releaseLink").textContent = pack.release;
+    $("sourceLink").textContent = pack.source;
+    $("footer").textContent = pack.footer;
+    $("modeDescription").textContent = pack.modeDescriptions[mode.value];
+    $("logTitle").textContent = pack.logTitle;
+    $("logIntro").textContent = pack.logIntro;
+    $("exportLog").textContent = pack.exportLog;
+    $("clearLog").textContent = pack.clearLog;
+    $("logSafety").textContent = pack.logSafety;
+    mode.options[0].textContent = pack.modes.goldhen;
+    mode.options[1].textContent = pack.modes.unlisted;
+    mode.options[2].textContent = pack.modes.homebrew;
+    firmware.options[0].textContent = pack.placeholder;
+    firmware.options[firmware.options.length - 1].textContent = pack.other;
+    if (!firmware.value) result.textContent = pack.choose;
+    else checkFirmware(false);
+    refreshLogLanguage();
   }
 
-  function renderMode() {
-    const t = dictionary[language.value] || dictionary.es;
-    $("modeDescription").textContent = t.modeDescriptions[mode.value];
-    if (mode.value === "homebrew") {
-      $("infoTitle").textContent = t.infoTitle;
-      $("infoText").textContent = t.infoText;
-    }
-    if (firmware.value) checkFirmware();
+  function refreshLogLanguage() {
+    const old = logEntries.slice();
+    logList.replaceChildren();
+    old.forEach(entry => {
+      const item = document.createElement("li");
+      const time = document.createElement("span");
+      const levelNode = document.createElement("span");
+      const messageNode = document.createElement("span");
+      time.className = "log-time";
+      levelNode.className = "log-level" + (entry.level === "error" ? " error" : entry.level === "warn" ? " warn" : "");
+      messageNode.className = "log-message";
+      time.textContent = entry.time.toLocaleTimeString();
+      levelNode.textContent = t().levels[entry.level] || entry.level.toUpperCase();
+      messageNode.textContent = entry.message;
+      item.append(time, levelNode, messageNode);
+      logList.appendChild(item);
+    });
   }
 
-  function checkFirmware() {
-    const t = dictionary[language.value] || dictionary.es;
+  function checkFirmware(shouldLog = true) {
+    const pack = t();
     const version = firmware.value;
     result.className = "";
     if (!version) {
-      result.textContent = t.choose;
+      result.textContent = pack.choose;
       return;
     }
+    if (shouldLog) addLog("info", "checkStart");
     if (version === "other") {
-      result.innerHTML = '<span class="status warn">' + t.notListed + '</span>' + t.otherText;
+      result.innerHTML = '<span class="status warn">' + pack.notListed + '</span>' + pack.otherText;
+      if (shouldLog) addLog("warn", "unlisted", version);
       return;
     }
     if (supported.has(version)) {
-      result.innerHTML = '<span class="status ok">' + t.known + '</span>' + t.knownText;
+      result.innerHTML = '<span class="status ok">' + pack.known + '</span>' + pack.knownText;
+      if (shouldLog) addLog("info", "listed", version);
     } else {
-      result.innerHTML = '<span class="status warn">' + t.notListed + '</span>' + t.unlistedText;
+      result.innerHTML = '<span class="status warn">' + pack.notListed + '</span>' + pack.unlistedText;
+      if (shouldLog) addLog("warn", "unlisted", version);
     }
   }
 
-  language.addEventListener("change", renderLanguage);
-  mode.addEventListener("change", renderMode);
-  $("check").addEventListener("click", checkFirmware);
-  firmware.addEventListener("change", checkFirmware);
-  renderLanguage();
+  function safeCheckFirmware() {
+    try {
+      checkFirmware(true);
+    } catch (error) {
+      result.textContent = t().log.error + " " + (error && error.message ? error.message : "Unknown error");
+      addLog("error", "error", error && error.message ? error.message : "Unknown error");
+      addLog("warn", "manual");
+    }
+  }
+
+  language.addEventListener("change", () => {
+    renderLanguage();
+    addLog("info", "language", language.options[language.selectedIndex].text);
+  });
+
+  mode.addEventListener("change", () => {
+    $("modeDescription").textContent = t().modeDescriptions[mode.value];
+    addLog("info", "mode", mode.options[mode.selectedIndex].text);
+    if (firmware.value) safeCheckFirmware();
+  });
+
+  firmware.addEventListener("change", () => {
+    if (firmware.value) addLog("info", "selected", firmware.value);
+    safeCheckFirmware();
+  });
+
+  $("check").addEventListener("click", safeCheckFirmware);
+
+  $("clearLog").addEventListener("click", () => {
+    logEntries.length = 0;
+    logList.replaceChildren();
+    addLog("info", "cleared");
+  });
+
+  $("exportLog").addEventListener("click", () => {
+    try {
+      const header = "PS4 GoldenHell - Activity log\nGenerated: " + new Date().toISOString() + "\n\n";
+      const body = logEntries.map(entry => "[" + entry.time.toISOString() + "] [" + entry.level.toUpperCase() + "] " + entry.message).join("\n");
+      const blob = new Blob([header + body + "\n"], {type:"text/plain;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "goldenhell-activity-log.txt";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      addLog("info", "exported");
+    } catch (error) {
+      addLog("error", "error", error && error.message ? error.message : "Log export failed");
+    }
+  });
+
+  window.addEventListener("error", event => {
+    addLog("error", "error", event.message || "Unknown page error");
+    addLog("warn", "manual");
+  });
+  window.addEventListener("unhandledrejection", event => {
+    const reason = event.reason && event.reason.message ? event.reason.message : String(event.reason || "Unknown rejection");
+    addLog("error", "promise", reason);
+    addLog("warn", "manual");
+  });
+
+  try {
+    renderLanguage();
+    addLog("info", "started");
+  } catch (error) {
+    result.textContent = "GoldenHell initialization error: " + (error && error.message ? error.message : "Unknown error");
+    addLog("error", "error", error && error.message ? error.message : "Unknown error");
+  }
 })();
 </script>
 </body>
