@@ -1,29 +1,35 @@
 # PS4GoldenHell
 
-PS4GoldenHell is a small Spanish-language information portal for the PS4 homebrew community.
+PS4GoldenHell is a multilingual information portal for the PS4 homebrew community.
 
-## What this site does
+## Features
 
-- Shows a firmware compatibility lookup based on the official GoldHEN v2.4b18 release notes.
-- Links directly to the official GoldHEN source repository and releases.
-- Deploys as a static site through GitHub Pages.
+- Spanish, English and Portuguese interface.
+- Firmware lookup based on the firmware list shown in the official GoldHEN v2.4b18 GitHub release.
+- Separate informational modes for listed firmware, unlisted firmware and homebrew information.
+- Direct links to the official GoldHEN project and release notes.
+- Automatic static deployment through GitHub Pages.
 
-## What this site does not do
+## Compatibility data
 
-This repository does not contain or execute a jailbreak exploit, install GoldHEN, distribute game files, or provide pirated content. A static GitHub Pages site alone is not an exploit host. Actual compatibility depends on the exact PS4 firmware and the appropriate, separately maintained exploit chain.
+The lookup marks a firmware as "listed" only when it appears in the official GoldHEN v2.4b18 GitHub release notes. Firmware such as 12.00 is displayed but marked as not listed in that specific release. This is not a claim that no community method exists; it means this portal does not certify it.
 
-## Publish with GitHub Pages
+Always check the official release notes for later changes. Do not assume that a payload made for one firmware is safe or compatible with another.
 
-1. Open **Settings → Pages** in this repository.
-2. Under **Build and deployment**, select **GitHub Actions** as the source.
-3. Push a change to the `main` branch, or run **Deploy PS4GoldenHell to GitHub Pages** from the Actions tab.
-4. When the workflow finishes successfully, GitHub will show the published site URL in the Pages settings and in the workflow deployment.
+## Scope
 
-## Official project references
+This is an informational homebrew portal. It does not contain or execute jailbreak exploits, install GoldHEN, host third-party payload binaries, or distribute commercial game files.
 
-- GoldHEN: https://github.com/GoldHEN/GoldHEN
-- Official releases: https://github.com/GoldHEN/GoldHEN/releases
+## Enable GitHub Pages
 
-The compatibility list on this page reflects the GoldHEN v2.4b18 release notes. Check the official release page for later updates before relying on it.
+1. Open **Settings → Pages**.
+2. Select **GitHub Actions** under **Build and deployment**.
+3. Push to `main` or run the workflow from the Actions tab.
+4. Open the Pages URL shown in repository settings after a successful deployment.
+
+## Official references
+
+- GoldHEN repository: https://github.com/GoldHEN/GoldHEN
+- GoldHEN releases: https://github.com/GoldHEN/GoldHEN/releases
 
 PS4GoldenHell is an independent community project and is not affiliated with Sony or the GoldHEN developers.
