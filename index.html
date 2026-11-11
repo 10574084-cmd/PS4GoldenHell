@@ -61,6 +61,7 @@
         <option>10.50</option>
         <option>10.70</option>
         <option>10.71</option>
+        <option>11.00</option>
         <option value="other">Otra versión</option>
       </select>
       <div><button id="check" type="button">Comprobar versión</button></div>
@@ -78,7 +79,7 @@
     <footer>PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN.</footer>
   </main>
   <script>
-    const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71"]);
+    const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71","11.00"]);
     const select = document.getElementById("firmware");
     const result = document.getElementById("result");
     document.getElementById("check").addEventListener("click", () => {
