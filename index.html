@@ -3,97 +3,240 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#11100c">
-  <title>PS4 GoldenHell — GoldHEN Homebrew</title>
+  <meta name="theme-color" content="#10100d">
+  <title>PS4 GoldenHell</title>
   <style>
-    :root { color-scheme: dark; --bg:#11100c; --panel:#1b1913; --gold:#f3c64e; --muted:#b9b19d; --line:#403823; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:radial-gradient(circle at 50% -15%,#473816 0,transparent 42%),var(--bg); color:#f6f1e5; font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif; }
-    main { width:min(900px,calc(100% - 32px)); margin:0 auto; padding:56px 0 40px; }
-    header { margin-bottom:28px; }
-    .eyebrow { color:var(--gold); font-size:.78rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
-    h1 { margin:8px 0 4px; font-size:clamp(2.2rem,7vw,4rem); line-height:1; letter-spacing:-.05em; }
-    h1 span { color:var(--gold); }
-    .subtitle { color:var(--muted); max-width:650px; }
-    .panel { border:1px solid var(--line); border-radius:18px; background:linear-gradient(145deg,rgba(255,255,255,.035),transparent 60%),var(--panel); padding:24px; margin:18px 0; box-shadow:0 18px 60px #0005; }
-    h2 { font-size:1.2rem; margin:0 0 10px; }
-    p { margin:8px 0; }
-    .notice { border-left:4px solid var(--gold); padding:12px 14px; background:#f3c64e12; border-radius:8px; color:#eee4c9; }
-    label { display:block; margin:18px 0 8px; font-weight:700; }
-    select { width:100%; max-width:440px; padding:13px 14px; border-radius:10px; border:1px solid #6d5a2e; background:#11100c; color:#fff; font:inherit; }
-    button,.link { display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--gold); border-radius:10px; padding:11px 16px; margin:12px 8px 0 0; background:var(--gold); color:#211a08; text-decoration:none; font-weight:800; cursor:pointer; }
-    .link.secondary { background:transparent; color:var(--gold); }
-    button:hover,.link:hover { filter:brightness(1.08); }
-    #result { min-height:52px; margin-top:14px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
-    .small { color:var(--muted); font-size:.9rem; }
-    footer { margin-top:28px; color:var(--muted); font-size:.85rem; text-align:center; }
-    a { color:var(--gold); }
-    @media(max-width:540px) { main{padding-top:36px}.panel{padding:18px} }
+    :root{color-scheme:dark;--bg:#10100d;--panel:#1a1914;--gold:#f4c95d;--text:#f7f3e8;--muted:#b9b19d;--line:#403823;--ok:#8ed2a3;--warn:#f2c46d}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -15%,#493918 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+    main{width:min(960px,calc(100% - 32px));margin:0 auto;padding:38px 0 44px}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px}
+    .eyebrow{color:var(--gold);font-size:.76rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+    h1{margin:8px 0 5px;font-size:clamp(2.3rem,7vw,4rem);line-height:1;letter-spacing:-.05em}
+    h1 span{color:var(--gold)}
+    .subtitle{color:var(--muted);max-width:650px}
+    .panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#ffffff08,transparent 60%),var(--panel);padding:22px;margin:16px 0;box-shadow:0 18px 60px #0004}
+    h2{font-size:1.18rem;margin:0 0 10px}
+    p{margin:8px 0}
+    .notice{border-left:4px solid var(--gold);padding:12px 14px;background:#f3c64e12;border-radius:8px;color:#eee4c9}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    label{display:block;margin:4px 0 7px;font-weight:700}
+    select{width:100%;padding:12px 13px;border-radius:10px;border:1px solid #6d5a2e;background:#11100c;color:#fff;font:inherit}
+    button,.link{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--gold);border-radius:10px;padding:10px 15px;margin:12px 8px 0 0;background:var(--gold);color:#211a08;text-decoration:none;font-weight:800;cursor:pointer}
+    .link.secondary{background:transparent;color:var(--gold)}
+    button:hover,.link:hover{filter:brightness(1.08)}
+    #result{min-height:82px;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:10px;color:var(--muted)}
+    .status{font-weight:800;display:block;margin-bottom:4px}
+    .status.ok{color:var(--ok)}.status.warn{color:var(--warn)}
+    .small{color:var(--muted);font-size:.9rem}
+    .pill{display:inline-block;padding:3px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.78rem}
+    footer{margin-top:26px;color:var(--muted);font-size:.84rem;text-align:center}
+    a{color:var(--gold)}
+    @media(max-width:650px){main{padding-top:26px}header{display:block}.controls{grid-template-columns:1fr}.panel{padding:18px}}
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <div class="eyebrow">Homebrew information portal</div>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow" id="eyebrow">Portal de homebrew para PS4</div>
       <h1>PS4 <span>GoldenHell</span></h1>
-      <p class="subtitle">Un panel sencillo para consultar la compatibilidad de GoldHEN y acceder a sus fuentes oficiales.</p>
-    </header>
+      <p class="subtitle" id="subtitle">Consulta de firmware, idiomas y recursos oficiales de homebrew.</p>
+    </div>
+    <span class="pill">Community project</span>
+  </header>
 
-    <section class="panel">
-      <h2>Antes de continuar</h2>
-      <p class="notice"><strong>Este sitio no ejecuta un jailbreak ni instala GoldHEN.</strong> Es una página informativa para homebrew. No incluye juegos, copias no autorizadas ni archivos de exploits.</p>
-      <p class="small">Comprueba la versión exacta en Ajustes → Sistema → Información del sistema. No actualices la consola solo para intentar obtener compatibilidad.</p>
-    </section>
+  <section class="panel">
+    <h2 id="settingsTitle">Preferencias</h2>
+    <div class="controls">
+      <div>
+        <label for="language" id="languageLabel">Idioma</label>
+        <select id="language">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+        </select>
+      </div>
+      <div>
+        <label for="mode" id="modeLabel">Modo</label>
+        <select id="mode">
+          <option value="goldhen">Compatibilidad GoldHEN</option>
+          <option value="unlisted">Firmware no listado</option>
+          <option value="homebrew">Información homebrew</option>
+        </select>
+      </div>
+    </div>
+    <p class="small" id="modeDescription">Consulta qué versiones aparecen en la publicación oficial enlazada.</p>
+  </section>
 
-    <section class="panel">
-      <h2>Consulta de compatibilidad</h2>
-      <p>Selecciona el firmware de tu PS4 para compararlo con la lista publicada en GoldHEN v2.4b18.</p>
-      <label for="firmware">Firmware de la consola</label>
-      <select id="firmware">
-        <option value="">Selecciona una versión…</option>
-        <option>5.05</option>
-        <option>6.71</option>
-        <option>6.72</option>
-        <option>9.00</option>
-        <option>9.60</option>
-        <option>10.00</option>
-        <option>10.01</option>
-        <option>10.50</option>
-        <option>10.70</option>
-        <option>10.71</option>
-        <option>11.00</option>
-        <option value="other">Otra versión</option>
-      </select>
-      <div><button id="check" type="button">Comprobar versión</button></div>
-      <div id="result" role="status" aria-live="polite">Elige un firmware para ver el resultado.</div>
-      <p class="small">La compatibilidad puede depender también del método de entrada y de los componentes utilizados por cada host. Esta consulta no garantiza que un procedimiento funcione.</p>
-    </section>
+  <section class="panel">
+    <h2 id="firmwareTitle">Consulta de firmware</h2>
+    <p id="firmwareIntro">Selecciona la versión de sistema de tu PS4. La comprobación compara la versión con la lista del lanzamiento oficial de GoldHEN v2.4b18 en GitHub.</p>
+    <label for="firmware" id="firmwareLabel">Firmware de la consola</label>
+    <select id="firmware">
+      <option value="">Selecciona una versión…</option>
+      <option>5.05</option><option>6.71</option><option>6.72</option><option>9.00</option>
+      <option>9.60</option><option>10.00</option><option>10.01</option><option>10.50</option>
+      <option>10.70</option><option>10.71</option><option>11.00</option>
+      <option>12.00</option><option>12.02</option><option>12.50</option><option>12.52</option>
+      <option>13.00</option><option>13.02</option><option>13.04</option><option>13.50</option>
+      <option>13.52</option><option>14.00</option><option value="other">Otra versión</option>
+    </select>
+    <div><button id="check" type="button">Comprobar</button></div>
+    <div id="result" role="status" aria-live="polite">Selecciona tu firmware y pulsa Comprobar.</div>
+    <p class="small" id="firmwareNote">“No listado” no significa necesariamente imposible; significa que esta publicación oficial concreta no confirma esa versión. No uses archivos de otro firmware.</p>
+  </section>
 
-    <section class="panel">
-      <h2>Fuentes oficiales</h2>
-      <p>Consulta los archivos, avisos y notas de versión directamente en el proyecto GoldHEN.</p>
-      <a class="link" href="https://github.com/GoldHEN/GoldHEN/releases" target="_blank" rel="noopener noreferrer">Ver versiones oficiales</a>
-      <a class="link secondary" href="https://github.com/GoldHEN/GoldHEN" target="_blank" rel="noopener noreferrer">Código fuente</a>
-    </section>
+  <section class="panel" id="infoPanel">
+    <h2 id="infoTitle">Recursos oficiales</h2>
+    <p id="infoText">Consulta las notas del proyecto original antes de instalar cualquier complemento. GoldenHell no contiene exploits ni payloads ejecutables.</p>
+    <a class="link" id="releaseLink" href="https://github.com/GoldHEN/GoldHEN/releases" target="_blank" rel="noopener noreferrer">Versiones oficiales de GoldHEN</a>
+    <a class="link secondary" id="sourceLink" href="https://github.com/GoldHEN/GoldHEN" target="_blank" rel="noopener noreferrer">Código fuente oficial</a>
+  </section>
 
-    <footer>PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN.</footer>
-  </main>
-  <script>
-    const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71","11.00"]);
-    const select = document.getElementById("firmware");
-    const result = document.getElementById("result");
-    document.getElementById("check").addEventListener("click", () => {
-      const version = select.value;
-      if (!version) {
-        result.textContent = "Selecciona primero la versión de firmware.";
-      } else if (supported.has(version)) {
-        result.textContent = "Esta versión aparece en la lista de compatibilidad de GoldHEN v2.4b18. Consulta las notas oficiales antes de hacer cualquier cambio.";
-      } else if (version === "other") {
-        result.textContent = "Esta página no tiene datos para esa versión. Revisa la lista y las notas de la versión oficial; no asumas compatibilidad.";
-      } else {
-        result.textContent = "No se ha seleccionado una versión reconocida.";
-      }
-    });
-  </script>
+  <footer id="footer">PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN.</footer>
+</main>
+<script>
+(() => {
+  const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71","11.00"]);
+  const dictionary = {
+    es: {
+      eyebrow:"Portal de homebrew para PS4", subtitle:"Consulta de firmware, idiomas y recursos oficiales de homebrew.",
+      settings:"Preferencias", language:"Idioma", mode:"Modo",
+      modes:{goldhen:"Compatibilidad GoldHEN",unlisted:"Firmware no listado",homebrew:"Información homebrew"},
+      modeDescriptions:{
+        goldhen:"Consulta qué versiones aparecen en la publicación oficial enlazada.",
+        unlisted:"Comprueba versiones como 12.00 que no aparecen en la lista oficial enlazada.",
+        homebrew:"Información sobre software casero y las funciones de este portal."
+      },
+      firmwareTitle:"Consulta de firmware",
+      firmwareIntro:"Selecciona la versión de sistema de tu PS4. La comprobación compara la versión con la lista del lanzamiento oficial de GoldHEN v2.4b18 en GitHub.",
+      firmwareLabel:"Firmware de la consola", placeholder:"Selecciona una versión…", other:"Otra versión",
+      check:"Comprobar", choose:"Selecciona tu firmware y pulsa Comprobar.",
+      known:"Figura en la lista", notListed:"No figura en esta publicación",
+      knownText:"Esta versión aparece en la lista de firmware de GoldHEN v2.4b18 publicada en el repositorio oficial. Esto no significa que GoldenHell ejecute el jailbreak.",
+      unlistedText:"Esta versión no aparece en la lista de GoldHEN v2.4b18 del repositorio oficial consultado. Su compatibilidad queda sin confirmar aquí.",
+      otherText:"No hay datos para esa versión en este portal. Consulta siempre las notas oficiales.",
+      note:"“No listado” no significa necesariamente imposible; significa que esta publicación oficial concreta no confirma esa versión. No uses archivos de otro firmware.",
+      infoTitle:"Recursos oficiales",
+      infoText:"Consulta las notas del proyecto original antes de instalar cualquier complemento. GoldenHell no contiene exploits ni payloads ejecutables.",
+      release:"Versiones oficiales de GoldHEN", source:"Código fuente oficial",
+      footer:"PS4 GoldenHell · Proyecto comunitario independiente · No afiliado a Sony ni al equipo GoldHEN."
+    },
+    en: {
+      eyebrow:"PS4 homebrew portal", subtitle:"Firmware lookup, language options and official homebrew resources.",
+      settings:"Preferences", language:"Language", mode:"Mode",
+      modes:{goldhen:"GoldHEN compatibility",unlisted:"Unlisted firmware",homebrew:"Homebrew information"},
+      modeDescriptions:{
+        goldhen:"Check which versions are listed by the linked official release.",
+        unlisted:"Check versions such as 12.00 that are not listed by the linked official release.",
+        homebrew:"Information about homebrew software and this portal's features."
+      },
+      firmwareTitle:"Firmware lookup",
+      firmwareIntro:"Select your PS4 system version. This checker compares it with the firmware list in the official GoldHEN v2.4b18 GitHub release.",
+      firmwareLabel:"Console firmware", placeholder:"Select a version…", other:"Other version",
+      check:"Check", choose:"Select your firmware and press Check.",
+      known:"Listed in release", notListed:"Not listed in this release",
+      knownText:"This version appears in the firmware list for GoldHEN v2.4b18 in the official repository. This does not mean GoldenHell runs a jailbreak.",
+      unlistedText:"This version does not appear in the GoldHEN v2.4b18 list in the official repository checked. Compatibility is unconfirmed here.",
+      otherText:"This portal has no data for that version. Always check the official release notes.",
+      note:"“Not listed” does not necessarily mean impossible; it means this specific official release does not confirm that version. Do not use files for a different firmware.",
+      infoTitle:"Official resources",
+      infoText:"Read the original project's release notes before installing any add-on. GoldenHell does not contain exploits or executable payloads.",
+      release:"Official GoldHEN releases", source:"Official source code",
+      footer:"PS4 GoldenHell · Independent community project · Not affiliated with Sony or the GoldHEN team."
+    },
+    pt: {
+      eyebrow:"Portal homebrew para PS4", subtitle:"Consulta de firmware, idiomas e recursos oficiais de homebrew.",
+      settings:"Preferências", language:"Idioma", mode:"Modo",
+      modes:{goldhen:"Compatibilidade GoldHEN",unlisted:"Firmware não listado",homebrew:"Informações homebrew"},
+      modeDescriptions:{
+        goldhen:"Consulte quais versões aparecem na publicação oficial vinculada.",
+        unlisted:"Confira versões como 12.00 que não aparecem na lista oficial vinculada.",
+        homebrew:"Informações sobre software caseiro e os recursos deste portal."
+      },
+      firmwareTitle:"Consulta de firmware",
+      firmwareIntro:"Selecione a versão do sistema do seu PS4. A verificação compara a versão com a lista do lançamento oficial GoldHEN v2.4b18 no GitHub.",
+      firmwareLabel:"Firmware do console", placeholder:"Selecione uma versão…", other:"Outra versão",
+      check:"Verificar", choose:"Selecione seu firmware e pressione Verificar.",
+      known:"Listado na versão", notListed:"Não listado nesta versão",
+      knownText:"Esta versão aparece na lista de firmware do GoldHEN v2.4b18 no repositório oficial. Isso não significa que o GoldenHell execute o jailbreak.",
+      unlistedText:"Esta versão não aparece na lista do GoldHEN v2.4b18 no repositório oficial consultado. A compatibilidade não está confirmada aqui.",
+      otherText:"Este portal não tem dados para essa versão. Consulte sempre as notas oficiais.",
+      note:"“Não listado” não significa necessariamente impossível; significa que esta publicação oficial específica não confirma essa versão. Não use arquivos de outro firmware.",
+      infoTitle:"Recursos oficiais",
+      infoText:"Consulte as notas do projeto original antes de instalar qualquer complemento. O GoldenHell não contém exploits nem payloads executáveis.",
+      release:"Versões oficiais do GoldHEN", source:"Código-fonte oficial",
+      footer:"PS4 GoldenHell · Projeto comunitário independente · Não afiliado à Sony nem à equipe GoldHEN."
+    }
+  };
+
+  const $ = id => document.getElementById(id);
+  const language = $("language"), mode = $("mode"), firmware = $("firmware"), result = $("result");
+
+  function renderLanguage() {
+    const t = dictionary[language.value] || dictionary.es;
+    document.documentElement.lang = language.value;
+    $("eyebrow").textContent = t.eyebrow;
+    $("subtitle").textContent = t.subtitle;
+    $("settingsTitle").textContent = t.settings;
+    $("languageLabel").textContent = t.language;
+    $("modeLabel").textContent = t.mode;
+    $("firmwareTitle").textContent = t.firmwareTitle;
+    $("firmwareIntro").textContent = t.firmwareIntro;
+    $("firmwareLabel").textContent = t.firmwareLabel;
+    $("check").textContent = t.check;
+    $("firmwareNote").textContent = t.note;
+    $("infoTitle").textContent = t.infoTitle;
+    $("infoText").textContent = t.infoText;
+    $("releaseLink").textContent = t.release;
+    $("sourceLink").textContent = t.source;
+    $("footer").textContent = t.footer;
+    $("modeDescription").textContent = t.modeDescriptions[mode.value];
+    mode.options[0].textContent = t.modes.goldhen;
+    mode.options[1].textContent = t.modes.unlisted;
+    mode.options[2].textContent = t.modes.homebrew;
+    firmware.options[0].textContent = t.placeholder;
+    firmware.options[firmware.options.length - 1].textContent = t.other;
+    if (!firmware.value) result.textContent = t.choose;
+    else checkFirmware();
+  }
+
+  function renderMode() {
+    const t = dictionary[language.value] || dictionary.es;
+    $("modeDescription").textContent = t.modeDescriptions[mode.value];
+    if (mode.value === "homebrew") {
+      $("infoTitle").textContent = t.infoTitle;
+      $("infoText").textContent = t.infoText;
+    }
+    if (firmware.value) checkFirmware();
+  }
+
+  function checkFirmware() {
+    const t = dictionary[language.value] || dictionary.es;
+    const version = firmware.value;
+    result.className = "";
+    if (!version) {
+      result.textContent = t.choose;
+      return;
+    }
+    if (version === "other") {
+      result.innerHTML = '<span class="status warn">' + t.notListed + '</span>' + t.otherText;
+      return;
+    }
+    if (supported.has(version)) {
+      result.innerHTML = '<span class="status ok">' + t.known + '</span>' + t.knownText;
+    } else {
+      result.innerHTML = '<span class="status warn">' + t.notListed + '</span>' + t.unlistedText;
+    }
+  }
+
+  language.addEventListener("change", renderLanguage);
+  mode.addEventListener("change", renderMode);
+  $("check").addEventListener("click", checkFirmware);
+  firmware.addEventListener("change", checkFirmware);
+  renderLanguage();
+})();
+</script>
 </body>
 </html>
