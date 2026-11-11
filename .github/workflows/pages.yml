@@ -24,6 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate inline JavaScript
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+          if len(scripts) != 1:
+              raise SystemExit("Expected exactly one inline script")
+          Path("/tmp/goldenhell.js").write_text(scripts[0], encoding="utf-8")
+          PY
+          node --check /tmp/goldenhell.js
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
