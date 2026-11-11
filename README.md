@@ -21,7 +21,7 @@ If the page detects an error, it records the error and leaves the console runnin
 
 ## Compatibility data
 
-The lookup marks a firmware as "listed" only when it appears in the official GoldHEN v2.4b18 GitHub release notes. Firmware such as 12.00 is displayed but marked as not listed in that specific release. This is not a claim that no community method exists; it means this portal does not certify it.
+The lookup marks a firmware as "listed" only when it appears in the official GoldHEN v2.4b18 GitHub release notes. Firmware 12.50 has a separate status in the interface: community documentation describes a homebrew route that uses a Blu-ray-based entry point, but this site does not include or launch that method. The official GoldHEN v2.4b18 GitHub release list checked by this project does not include 12.50. This status is informational, not a compatibility guarantee.
 
 Always check the official release notes for later changes. Do not assume that a payload made for one firmware is compatible with another.
 
