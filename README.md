@@ -4,17 +4,26 @@ PS4GoldenHell is a multilingual information portal for the PS4 homebrew communit
 
 ## Features
 
-- Spanish, English and Portuguese interface.
+- 13 interface languages: Spanish, English, Portuguese, French, German, Italian, Russian, Japanese, Korean, Simplified Chinese, Arabic, Turkish and Indonesian.
 - Firmware lookup based on the firmware list shown in the official GoldHEN v2.4b18 GitHub release.
-- Separate informational modes for listed firmware, unlisted firmware and homebrew information.
+- Informational modes for listed firmware, unlisted firmware and homebrew information.
+- Activity log for page events: startup, language and mode changes, selected firmware, compatibility checks and interface errors.
+- Export and clear controls for the activity log.
+- Error handling that leaves the page visible and does not request an automatic console shutdown or restart.
 - Direct links to the official GoldHEN project and release notes.
 - Automatic static deployment through GitHub Pages.
+
+## Activity log behavior
+
+The activity log records only events that this website can actually observe. It is not an exploit trace and does not claim that GoldHEN or a jailbreak has been executed. The log is kept in page memory and can be exported as a text file.
+
+If the page detects an error, it records the error and leaves the console running. It does not call a shutdown or reboot function. The user decides whether to leave the page or restart the console.
 
 ## Compatibility data
 
 The lookup marks a firmware as "listed" only when it appears in the official GoldHEN v2.4b18 GitHub release notes. Firmware such as 12.00 is displayed but marked as not listed in that specific release. This is not a claim that no community method exists; it means this portal does not certify it.
 
-Always check the official release notes for later changes. Do not assume that a payload made for one firmware is safe or compatible with another.
+Always check the official release notes for later changes. Do not assume that a payload made for one firmware is compatible with another.
 
 ## Scope
 
