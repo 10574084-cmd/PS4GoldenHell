@@ -362,7 +362,7 @@
   function addLog(level, key, detail) {
     const pack = t();
     const message = (pack.log[key] || dictionary.en.log[key] || key) + (detail ? " " + String(detail) : "");
-    const entry = {time:new Date(), level, message};
+    const entry = {time:new Date(), level, key, detail:detail ? String(detail) : "", message};
     logEntries.push(entry);
     if (logEntries.length > maxLogEntries) logEntries.shift();
 
@@ -376,7 +376,9 @@
     time.textContent = entry.time.toLocaleTimeString();
     levelNode.textContent = pack.levels[level] || level.toUpperCase();
     messageNode.textContent = message;
-    item.append(time, levelNode, messageNode);
+    item.appendChild(time);
+    item.appendChild(levelNode);
+    item.appendChild(messageNode);
     logList.appendChild(item);
     while (logList.children.length > maxLogEntries) logList.removeChild(logList.firstChild);
     logList.scrollTop = logList.scrollHeight;
@@ -417,9 +419,11 @@
     refreshLogLanguage();
   }
 
+  function clearNode(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
   function refreshLogLanguage() {
     const old = logEntries.slice();
-    logList.replaceChildren();
+    clearNode(logList);
     old.forEach(entry => {
       const item = document.createElement("li");
       const time = document.createElement("span");
@@ -430,8 +434,10 @@
       messageNode.className = "log-message";
       time.textContent = entry.time.toLocaleTimeString();
       levelNode.textContent = t().levels[entry.level] || entry.level.toUpperCase();
-      messageNode.textContent = entry.message;
-      item.append(time, levelNode, messageNode);
+      messageNode.textContent = (t().log[entry.key] || dictionary.en.log[entry.key] || entry.key) + (entry.detail ? " " + entry.detail : "");
+      item.appendChild(time);
+      item.appendChild(levelNode);
+      item.appendChild(messageNode);
       logList.appendChild(item);
     });
   }
@@ -489,14 +495,14 @@
 
   $("clearLog").addEventListener("click", () => {
     logEntries.length = 0;
-    logList.replaceChildren();
+    clearNode(logList);
     addLog("info", "cleared");
   });
 
   $("exportLog").addEventListener("click", () => {
     try {
       const header = "PS4 GoldenHell - Activity log\nGenerated: " + new Date().toISOString() + "\n\n";
-      const body = logEntries.map(entry => "[" + entry.time.toISOString() + "] [" + entry.level.toUpperCase() + "] " + entry.message).join("\n");
+      const body = logEntries.map(entry => "[" + entry.time.toISOString() + "] [" + entry.level.toUpperCase() + "] " + (t().log[entry.key] || dictionary.en.log[entry.key] || entry.key) + (entry.detail ? " " + entry.detail : "")).join("\n");
       const blob = new Blob([header + body + "\n"], {type:"text/plain;charset=utf-8"});
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
@@ -504,8 +510,8 @@
       anchor.download = "goldenhell-activity-log.txt";
       document.body.appendChild(anchor);
       anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
+      if (anchor.parentNode) anchor.parentNode.removeChild(anchor);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       addLog("info", "exported");
     } catch (error) {
       addLog("error", "error", error && error.message ? error.message : "Log export failed");
