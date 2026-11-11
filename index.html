@@ -128,6 +128,21 @@
 <script>
 (() => {
   const supported = new Set(["5.05","6.71","6.72","9.00","9.60","10.00","10.01","10.50","10.70","10.71","11.00"]);
+  const community12 = {
+    es: {title:"Ruta comunitaria documentada · no se ejecuta aquí", text:"Para 12.50 hay documentación comunitaria sobre homebrew mediante un método externo al navegador. Esta página no contiene ni inicia ese método; la lista oficial de GoldHEN v2.4b18 consultada no incluye 12.50."},
+    en: {title:"Community-documented route · not launched here", text:"Community documentation describes a homebrew route for 12.50 that is external to the browser. This page does not contain or launch that method; the checked official GoldHEN v2.4b18 list does not include 12.50."},
+    pt: {title:"Método comunitário documentado · não é iniciado aqui", text:"Há documentação comunitária de um método homebrew para 12.50 externo ao navegador. Esta página não contém nem inicia esse método; a lista oficial consultada do GoldHEN v2.4b18 não inclui 12.50."},
+    fr: {title:"Méthode communautaire documentée · non lancée ici", text:"Une documentation communautaire décrit une méthode homebrew pour la version 12.50, indépendante du navigateur. Cette page ne contient pas et ne lance pas cette méthode ; la liste officielle GoldHEN v2.4b18 consultée n'inclut pas la 12.50."},
+    de: {title:"Community-Methode dokumentiert · wird hier nicht gestartet", text:"Community-Dokumentation beschreibt eine Homebrew-Methode für 12.50 außerhalb des Browsers. Diese Seite enthält oder startet diese Methode nicht; die geprüfte offizielle GoldHEN-v2.4b18-Liste enthält 12.50 nicht."},
+    it: {title:"Metodo comunitario documentato · non avviato qui", text:"La documentazione della community descrive un metodo homebrew per la versione 12.50 esterno al browser. Questa pagina non contiene né avvia tale metodo; l'elenco ufficiale GoldHEN v2.4b18 consultato non include 12.50."},
+    ru: {title:"Описан метод сообщества · здесь не запускается", text:"В документации сообщества описан способ запуска homebrew для 12.50 вне браузера. Эта страница не содержит и не запускает этот метод; в проверенном официальном списке GoldHEN v2.4b18 версии 12.50 нет."},
+    ja: {title:"コミュニティで報告された方法 · このページからは起動しません", text:"コミュニティ資料では、ブラウザー外の方法による 12.50 向け homebrew が説明されています。このページにはその方法は含まれず、起動もしません。確認した公式 GoldHEN v2.4b18 の一覧に 12.50 は含まれていません。"},
+    ko: {title:"커뮤니티 문서의 경로 · 여기서 실행되지 않음", text:"커뮤니티 문서에는 브라우저 외부의 방법을 통한 12.50 홈브루 경로가 설명되어 있습니다. 이 페이지에는 해당 방법이 포함되어 있지 않으며 실행하지도 않습니다. 확인한 공식 GoldHEN v2.4b18 목록에는 12.50이 없습니다."},
+    zh: {title:"社区文档记录的方式 · 本页面不会启动", text:"社区资料介绍了适用于 12.50、但不通过浏览器启动的 homebrew 方法。本页面不包含也不会启动该方法；所查询的官方 GoldHEN v2.4b18 列表不包含 12.50。"},
+    ar: {title:"مسار موثق من المجتمع · لا يتم تشغيله هنا", text:"تصف وثائق المجتمع طريقة homebrew للإصدار 12.50 خارج المتصفح. لا تحتوي هذه الصفحة على تلك الطريقة ولا تقوم بتشغيلها؛ قائمة GoldHEN v2.4b18 الرسمية التي تم التحقق منها لا تتضمن 12.50."},
+    tr: {title:"Topluluk belgelerinde yer alan yöntem · burada başlatılmaz", text:"Topluluk belgeleri, tarayıcı dışında çalışan 12.50 için bir homebrew yönteminden bahseder. Bu sayfa yöntemi içermez veya başlatmaz; kontrol edilen resmî GoldHEN v2.4b18 listesinde 12.50 bulunmaz."},
+    id: {title:"Metode komunitas terdokumentasi · tidak dijalankan di sini", text:"Dokumentasi komunitas menjelaskan jalur homebrew untuk 12.50 yang berada di luar browser. Halaman ini tidak memuat atau menjalankan metode tersebut; daftar resmi GoldHEN v2.4b18 yang diperiksa tidak mencantumkan 12.50."}
+  };
   const dictionary = {
     es:{
       eyebrow:"Portal de homebrew para PS4",subtitle:"Consulta de firmware, idiomas y recursos oficiales de homebrew.",
@@ -454,6 +469,12 @@
     if (version === "other") {
       result.innerHTML = '<span class="status warn">' + pack.notListed + '</span>' + pack.otherText;
       if (shouldLog) addLog("warn", "unlisted", version);
+      return;
+    }
+    if (version === "12.50") {
+      const notice = community12[language.value] || community12.es;
+      result.innerHTML = '<span class="status warn">' + notice.title + '</span>' + notice.text;
+      if (shouldLog) addLog("warn", "unlisted", "12.50 — community homebrew route documented; not launched by this site");
       return;
     }
     if (supported.has(version)) {
